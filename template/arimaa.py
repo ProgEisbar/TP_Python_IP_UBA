@@ -24,7 +24,7 @@ def pasar_turno(j : Juego) -> Juego: # pragma: no cover
 
 def tablero_bien_formado(t : Tablero) -> bool:
     res:bool = False
-    for i in range(t): 
+    for i in range(len(t)): 
         if len(t[i]) == ANCHO and len(t)==ALTO: 
             res = True
         else: 
@@ -32,23 +32,23 @@ def tablero_bien_formado(t : Tablero) -> bool:
     return res
 
 def posicion_en_tablero(pos : Posicion) -> bool:
-    for (fila,columna) in pos: 
-        if 0 <= fila < ALTO and 0 <= columna < ANCHO: 
-            return True 
-        else: 
-            return False 
+    (fila,columna) = pos 
+    if 0 <= fila < ALTO and 0 <= columna < ANCHO: 
+        return True 
+    else: 
+        return False 
 
 
 def movimiento_bien_formado(m : Movimiento) -> bool:
-    for (accion,origen,pasos) in m: 
-        res:bool= False
-        if posicion_en_tablero(origen):
-            if accion == MOVER_A_SECAS and len(pasos)==1:
-                res = True
-            elif accion == ARRASTRAR and len(pasos)==2:
-                res = True 
-            elif accion == EMPUJAR and len(pasos)==2:
-                res = True 
+    (accion,origen,pasos) = m 
+    res:bool= False
+    if posicion_en_tablero(origen):
+        if accion == MOVER_A_SECAS and len(pasos)==1:
+            res = True
+        elif accion == ARRASTRAR and len(pasos)==2:
+            res = True 
+        elif accion == EMPUJAR and len(pasos)==2:
+            res = True 
         else: 
             return False 
     return res 
