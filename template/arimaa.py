@@ -64,16 +64,32 @@ def juego_bien_formado(j : Juego) -> bool:
 #### Ejercicio 2
 
 def posicion_vecina_hacia(pos : Posicion, d : Direccion) -> Posicion:
-    raise Exception("No implementado")
+    (fila,columna) = pos 
+    if d == NORTE: 
+        pos_final = (fila+1,columna)
+    elif d == SUR: 
+        pos_final = (fila-1,columna)
+    elif d == ESTE:
+        pos_final = (fila,columna+1)
+    else: 
+        pos_final = (fila,columna-1)
+    return pos_final 
 
 def casilla_en_posicion(t : Tablero, p : Posicion) -> Casilla:
-    raise Exception("No implementado")
+    (fila,columna) = p 
+    return t[fila][columna]
 
 def hay_casilla_vacia(t : Tablero, pos : Posicion) -> bool:
-    raise Exception("No implementado")
+    if casilla_en_posicion(t,pos) == VACIA:
+        return True 
 
 def hay_pieza_de_color(t : Tablero, pos : Posicion, col : Color) -> bool:
-    raise Exception("No implementado")
+    if not hay_casilla_vacia(t,pos): 
+        (figura,color) = casilla_en_posicion(t,pos)
+        if color == col: 
+            return True
+        else: 
+            return False
 
 #### Ejercicio 3
 
