@@ -152,21 +152,78 @@ def hay_pieza_de_color(t : Tablero, pos : Posicion, col : Color) -> bool:
 
 #### Ejercicio 3
 
-def hay_casilla_vacia_hacia(t : Tablero, pos : Posicion, d : Direccion) -> bool:
-    raise Exception("No implementado")
+def hay_casilla_vacia_hacia(
+    t: Tablero, pos: Posicion, d: Direccion) -> bool:
+    """Indica si la casilla vecina en la dirección d está vacía."""
+    vecina: Posicion = Posicion(*posicion_vecina_hacia(pos, d))
 
-def hay_pieza_amiga_vecina(t : Tablero, pos : Posicion) -> bool:
-    raise Exception("No implementado")
+    return (
+        posicion_en_tablero(vecina)
+        and t[vecina.fila][vecina.columna] == VACIA
+    )
 
-def hay_pieza_enemiga_mas_debil_hacia(t : Tablero, pos : Posicion, d : Direccion) -> bool:
-    raise Exception("No implementado")
+def hay_pieza_amiga_vecina(t: Tablero, pos: Posicion) -> bool:
+    """
+    Indica si la pieza en pos tiene una pieza amiga vecina.
+    Precondición: la casilla pos contiene una pieza.
+    """
+    pieza: Casilla = t[pos.fila][pos.columna]
+    encontrada: bool = False
+    for direccion in [NORTE, SUR, ESTE, OESTE]:
+        vecina: Posicion = Posicion(
+            *posicion_vecina_hacia(pos, direccion)
+        )
+        if posicion_en_tablero(vecina):
+            casilla: Casilla = t[vecina.fila][vecina.columna]
+            if casilla != VACIA and casilla.color == pieza.color:
+                encontrada = True
+    return encontrada
+    
+def hay_pieza_enemiga_mas_debil_hacia(
+    t: Tablero, pos: Posicion, d: Direccion) -> bool:
+    """
+    Indica si en dirección d hay una pieza enemiga más débil.
+    Precondición: la casilla pos contiene una pieza.
+    """
+    pieza: Casilla = t[pos.fila][pos.columna]
+    vecina: Posicion = Posicion(*posicion_vecina_hacia(pos, d))
+    encontrada: bool = False
+    if posicion_en_tablero(vecina):
+        casilla: Casilla = t[vecina.fila][vecina.columna]
+        if casilla != VACIA:
+            encontrada = (
+                casilla.color != pieza.color
+                and fuerza(casilla.figura) < fuerza(pieza.figura)
+            )
+    return encontrada
 
-def hay_pieza_enemiga_mas_fuerte_vecina(t : Tablero, pos : Posicion) -> bool:
-    raise Exception("No implementado")
+def hay_pieza_enemiga_mas_fuerte_vecina(
+    t: Tablero, pos: Posicion) -> bool:
+    """
+    Indica si la pieza en pos tiene una enemiga más fuerte al lado.
+    Precondición: la casilla pos contiene una pieza.
+    """
+    pieza: Casilla = t[pos.fila][pos.columna]
+    encontrada: bool = False
+    for direccion in [NORTE, SUR, ESTE, OESTE]:
+        vecina: Posicion = Posicion(*posicion_vecina_hacia(pos, direccion))
+        if posicion_en_tablero(vecina):
+            casilla: Casilla = t[vecina.fila][vecina.columna]
+            if casilla != VACIA:
+                if (
+                    casilla.color != pieza.color
+                    and fuerza(casilla.figura) > fuerza(pieza.figura)):encontrada = True
+    return encontrada
 
-def hay_pieza_congelada(t : Tablero, pos : Posicion) -> bool:
-    raise Exception("No implementado")
-
+def hay_pieza_congelada(t: Tablero, pos: Posicion) -> bool:
+    """
+    Indica si la casilla pos contiene una pieza congelada.
+    """
+    return (
+        t[pos.fila][pos.columna] != VACIA
+        and hay_pieza_enemiga_mas_fuerte_vecina(t, pos)
+        and not hay_pieza_amiga_vecina(t, pos)
+    )
 #### Ejercicio 4
 
 def puede_realizar_movimiento(j : Juego, m : Movimiento) -> bool:
