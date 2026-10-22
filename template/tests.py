@@ -38,6 +38,43 @@ def tablero_8x8_inicial_ejemplo():
               #01234567
             ])
 
+def tablero_6x8():
+    return leer_tablero([
+        '--------', #5
+        '--------', #4
+        '--------', #3
+        '--------', #2
+        'RRRRRRRR', #1
+        'HCDMEDCH', #0
+        #01234567
+    ])
+
+def tablero_8x6():
+    return leer_tablero([
+            "------"  #7
+            "------"  #6
+            '------', #5
+            '------', #4
+            '------', #3
+            '------', #2
+            'RRRRRR', #1
+            'HCDMED', #0
+            #01234567
+        ])
+
+def tablero_deforme():
+    return leer_tablero([
+            "--------"  #6
+            '--------', #5
+            '-------', #4
+            '------ee', #3
+            '------hh', #2
+            'RRRRRRRR', #1
+            'HCDMED', #0
+            #01234567
+        ])
+
+
 #### Ejercicio 1
 
 class test_tablero_bien_formado(unittest.TestCase):
@@ -46,21 +83,48 @@ class test_tablero_bien_formado(unittest.TestCase):
         t = tablero_8x8_inicial_ejemplo()
         self.assertTrue(tablero_bien_formado(t))
 
+    def test_falta_una_fila(self):
+        t = tablero_6x8()
+        self.assertFalse(tablero_bien_formado(t))
+
+    def test_falta_una_columna(self):
+        t = tablero_8x6()
+        self.assertFalse(tablero_bien_formado(t))
+
+    def test_distintos_largos_de_fila(self):
+        t = tablero_deforme()
+        self.assertFalse(tablero_bien_formado(t))
+
+
 class test_posicion_en_tablero(unittest.TestCase):
 
     def test_posicion_ok(self):
         self.assertTrue(posicion_en_tablero(Posicion(5, 3)))
+
+    def test_posicion_negativa(self):
+        self.assertFalse(posicion_en_tablero(Posicion(-1,-2)))
+
+    def test_posicion_limite(self):
+        self.assertFalse(posicion_en_tablero(Posicion(0,8)))
 
 class test_movimiento_bien_formado(unittest.TestCase):
 
     def test_movimiento_ok(self):
         self.assertTrue(movimiento_bien_formado(Movimiento(MOVER_A_SECAS, Posicion(0, 1), [NORTE])))
 
+    def test_movimiento_no_ok(self):
+        self.assertFalse(movimiento_bien_formado(Movimiento(ARRASTRAR,Posicion(1,0),3)))
+        
+
 class test_juego_bien_formado(unittest.TestCase):
 
     def test_juego_ok(self):
         j = Juego(tablero_8x8_vacio(), DORADO, 0)
         self.assertTrue(juego_bien_formado(j))
+
+    def test_juego_no_ok(self):
+        j = Juego(tablero_8x8_inicial_ejemplo(),PLATEADO,5)
+        self.assertFalse(juego_bien_formado(j))
 
 #### Ejercicio 2
 
