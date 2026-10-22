@@ -154,14 +154,14 @@ def hay_pieza_de_color(t : Tablero, pos : Posicion, col : Color) -> bool:
 
 def hay_casilla_vacia_hacia(
     t: Tablero, pos: Posicion, d: Direccion) -> bool:
-    """Indica si la casilla vecina en la dirección d está vacía."""
+    """
+    Indica si la casilla vecina en la dirección d está vacía.
+    """
     vecina: Posicion = Posicion(*posicion_vecina_hacia(pos, d))
-
     return (
         posicion_en_tablero(vecina)
         and t[vecina.fila][vecina.columna] == VACIA
     )
-
 def hay_pieza_amiga_vecina(t: Tablero, pos: Posicion) -> bool:
     """
     Indica si la pieza en pos tiene una pieza amiga vecina.
@@ -178,7 +178,6 @@ def hay_pieza_amiga_vecina(t: Tablero, pos: Posicion) -> bool:
             if casilla != VACIA and casilla.color == pieza.color:
                 encontrada = True
     return encontrada
-    
 def hay_pieza_enemiga_mas_debil_hacia(
     t: Tablero, pos: Posicion, d: Direccion) -> bool:
     """
@@ -193,10 +192,8 @@ def hay_pieza_enemiga_mas_debil_hacia(
         if casilla != VACIA:
             encontrada = (
                 casilla.color != pieza.color
-                and fuerza(casilla.figura) < fuerza(pieza.figura)
-            )
+                and fuerza(casilla.figura) < fuerza(pieza.figura))
     return encontrada
-
 def hay_pieza_enemiga_mas_fuerte_vecina(
     t: Tablero, pos: Posicion) -> bool:
     """
@@ -210,11 +207,8 @@ def hay_pieza_enemiga_mas_fuerte_vecina(
         if posicion_en_tablero(vecina):
             casilla: Casilla = t[vecina.fila][vecina.columna]
             if casilla != VACIA:
-                if (
-                    casilla.color != pieza.color
-                    and fuerza(casilla.figura) > fuerza(pieza.figura)):encontrada = True
+                if (casilla.color != pieza.color and fuerza(casilla.figura) > fuerza(pieza.figura)):encontrada = True
     return encontrada
-
 def hay_pieza_congelada(t: Tablero, pos: Posicion) -> bool:
     """
     Indica si la casilla pos contiene una pieza congelada.
@@ -222,13 +216,43 @@ def hay_pieza_congelada(t: Tablero, pos: Posicion) -> bool:
     return (
         t[pos.fila][pos.columna] != VACIA
         and hay_pieza_enemiga_mas_fuerte_vecina(t, pos)
-        and not hay_pieza_amiga_vecina(t, pos)
-    )
-#### Ejercicio 4
+        and not hay_pieza_amiga_vecina(t, pos))
 
-def puede_realizar_movimiento(j : Juego, m : Movimiento) -> bool:
-    raise Exception("No implementado")
+#### EJERCICIO 4
 
+def puede_realizar_movimiento(j: Juego, m: Movimiento) -> bool:
+    """
+    Indica si el movimiento puede realizarse en el juego.
+    Precondición: j y m están bien formados.
+    """
+    t: Tablero = j.tablero
+    pos: Posicion = m.origen
+    pieza: Casilla = t[pos.fila][pos.columna]
+    puede: bool = False
+    if pieza != VACIA and pieza.color == j.turno:
+        direccion_valida: bool = not (
+            pieza.figura == CONEJO
+            and (
+                (pieza.color == DORADO and m.pasos[0] == SUR)
+                or (pieza.color == PLATEADO and m.pasos[0] == NORTE))
+        if (
+            not hay_pieza_congelada(t, pos)
+            and direccion_valida
+            and j.pasos_consumidos + len(m.pasos) <= MAX_PASOS):
+            if m.accion == MOVER_A_SECAS:
+                puede = hay_casilla_vacia_hacia(t, pos, m.pasos[0])
+            elif m.accion == ARRASTRAR:
+                puede = (
+                    hay_casilla_vacia_hacia(t, pos, m.pasos[0])
+                    and hay_pieza_enemiga_mas_debil_hacia(
+                        t, pos, opuesta(m.pasos[1])))
+            elif m.accion == EMPUJAR:
+                if hay_pieza_enemiga_mas_debil_hacia(t, pos, m.pasos[0]):
+                    enemiga: Posicion = Posicion(
+                        *posicion_vecina_hacia(pos, m.pasos[0])
+                    )
+                    puede = hay_casilla_vacia_hacia(t, enemiga, m.pasos[1])
+    return puede
 #### Ejercicio 5
 
 def activar_trampas(t : Tablero) -> Tablero:
