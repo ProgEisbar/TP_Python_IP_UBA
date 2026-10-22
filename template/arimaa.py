@@ -23,15 +23,38 @@ def pasar_turno(j : Juego) -> Juego: # pragma: no cover
 #### Ejercicio 1
 
 def tablero_bien_formado(t : Tablero) -> bool:
-    res:bool = False
+    """
+    Indica si el tablero *t* está bien formado. 
+    
+    PRE: True 
+
+    Args: 
+        t (Tablero): La matriz para el cual se indice si está bien formado o no. 
+    
+    Returns:
+        True si el tablero *t* está bien formado y False si no. 
+    """
+    esta_bien_formado:bool = False
     for i in range(len(t)): 
         if len(t[i]) == ANCHO and len(t)==ALTO: 
-            res = True
+            esta_bien_formado = True
         else: 
             return False
-    return res
+    return esta_bien_formado
 
 def posicion_en_tablero(pos : Posicion) -> bool:
+    """
+    Indica si la posición *pos* está en el tablero. 
+
+    PRE: True 
+
+    Args: 
+        pos (Posicion): La tupla con valores de fila y columna que se quiere 
+        verificar si está en el tablero. 
+    
+    Returns: 
+        True si la posición está en el tablero y False si no. 
+    """
     (fila,columna) = pos 
     if 0 <= fila < ALTO and 0 <= columna < ANCHO: 
         return True 
@@ -40,6 +63,17 @@ def posicion_en_tablero(pos : Posicion) -> bool:
 
 
 def movimiento_bien_formado(m : Movimiento) -> bool:
+    """
+    Indica si el movimiento *m* está bien formado. 
+
+    PRE: True
+
+    Args: 
+        m (Movimiento): El movimiento el cual se quiere indicar si está bien formado o no.
+
+    Returns:
+        True si el movimiento está bien formado, False si no.
+    """
     (accion,origen,pasos) = m 
     res:bool= False
     if posicion_en_tablero(origen):
@@ -55,6 +89,18 @@ def movimiento_bien_formado(m : Movimiento) -> bool:
         
 
 def juego_bien_formado(j : Juego) -> bool:
+    """
+    Indica si el juego *j* está bien formado. 
+
+    PRE: True 
+
+    Args: 
+        j(Juego): El juego para el cual se quiere determinar si está bien formado. 
+
+    Returns: 
+        True si el juego está bien formado, False si no. 
+    
+    """
     (tablero,color,pasosConsumidos) = j 
     if tablero_bien_formado(tablero) and 0 <= pasosConsumidos < MAX_PASOS:
         return True
@@ -64,6 +110,19 @@ def juego_bien_formado(j : Juego) -> bool:
 #### Ejercicio 2
 
 def posicion_vecina_hacia(pos : Posicion, d : Direccion) -> Posicion:
+    """
+    Indica la posición vecina de la posición *pos* en dirección *d*. 
+
+    PRE: True
+
+    Args: 
+        pos(Posicion): Posición para la cual se quiere determinar su posición vecina en dirección *d*.
+        d(Dirección): Dirección de la casilla vecina en relación a posición *pos*. 
+
+    Returns: 
+        Posición de la posición vecina en dirección *d*. 
+
+    """
     (fila,columna) = pos 
     if d == NORTE: 
         pos_final = (fila+1,columna)
