@@ -24,88 +24,155 @@ def pasar_turno(j : Juego) -> Juego: # pragma: no cover
 
 def tablero_bien_formado(t : Tablero) -> bool:
     """
-    Indica si el tablero *t* está bien formado. 
-    
-    PRE: True 
-
-    Args: 
-        t (Tablero): La matriz para el cual se indice si está bien formado o no. 
-    
+    Indica si el tablero *t* está bien formado: tiene ALTO filas y cada fila
+    tiene ANCHO casillas.
+ 
+    PRE: True
+ 
+    Args:
+        t (Tablero): El tablero para el cual se indica si está bien formado o no.
+ 
     Returns:
-        True si el tablero *t* está bien formado y False si no. 
+        True si el tablero *t* está bien formado y False si no.
     """
-    esta_bien_formado:bool = False
-    for i in range(len(t)): 
-        if len(t[i]) == ANCHO and len(t)==ALTO: 
-            esta_bien_formado = True
-        else: 
-            return False
-    return esta_bien_formado
+    todas_con_ancho_correcto: bool = True
+    fila: list[Casilla]
+    for fila in t:
+        todas_con_ancho_correcto = todas_con_ancho_correcto and len(fila) == ANCHO
+    return len(t) == ALTO and todas_con_ancho_correcto
 
 def posicion_en_tablero(pos : Posicion) -> bool:
     """
-    Indica si la posición *pos* está en el tablero. 
-
-    PRE: True 
-
-    Args: 
-        pos (Posicion): La tupla con valores de fila y columna que se quiere 
-        verificar si está en el tablero. 
-    
-    Returns: 
-        True si la posición está en el tablero y False si no. 
+    Indica si la posición *pos* pertenece al tablero.
+ 
+    PRE: True
+ 
+    Args:
+        pos (Posicion): La posición (fila, columna) que se quiere verificar.
+ 
+    Returns:
+        True si 0 <= fila < ALTO y 0 <= columna < ANCHO, y False si no.
     """
-    (fila,columna) = pos 
-    if 0 <= fila < ALTO and 0 <= columna < ANCHO: 
-        return True 
-    else: 
-        return False 
+    return (0 <= pos.fila < ALTO and 0<= pos.columna < ANCHO )
 
 
 def movimiento_bien_formado(m : Movimiento) -> bool:
     """
-    Indica si el movimiento *m* está bien formado. 
-
+    Indica si el movimiento *m* está bien formado: su origen pertenece al
+    tablero y tiene un paso si mueve a secas, o dos si arrastra o empuja.
+ 
     PRE: True
-
-    Args: 
-        m (Movimiento): El movimiento el cual se quiere indicar si está bien formado o no.
-
+ 
+    Args:
+        m (Movimiento): El movimiento para el cual se indica si está bien formado o no.
+ 
     Returns:
         True si el movimiento está bien formado, False si no.
     """
-    (accion,origen,pasos) = m 
-    res:bool= False
-    if posicion_en_tablero(origen):
-        if accion == MOVER_A_SECAS and len(pasos)==1:
-            res = True
-        elif accion == ARRASTRAR and len(pasos)==2:
-            res = True 
-        elif accion == EMPUJAR and len(pasos)==2:
-            res = True 
-        else: 
-            return False 
-    return res 
-        
+    cantidad_de_pasos_esperada: int
+    if m.accion == MOVER_A_SECAS:
+        cantidad_de_pasos_esperada = 1
+    else:
+        cantidad_de_pasos_esperada = 2
+    return posicion_en_tablero(m.origen) and len(m.pasos) == cantidad_de_pasos_esperada
+
 
 def juego_bien_formado(j : Juego) -> bool:
     """
-    Indica si el juego *j* está bien formado. 
-
-    PRE: True 
-
-    Args: 
-        j(Juego): El juego para el cual se quiere determinar si está bien formado. 
-
-    Returns: 
-        True si el juego está bien formado, False si no. 
-    
+    Indica si el juego *j* está bien formado: su tablero está bien formado y
+    los pasos consumidos están entre 0 (inclusive) y MAX_PASOS (exclusive).
+ 
+    PRE: True
+ 
+    Args:
+        j (Juego): El juego para el cual se indica si está bien formado o no.
+ 
+    Returns:
+        True si el juego está bien formado, False si no.
     """
-    (tablero,color,pasosConsumidos) = j 
-    if tablero_bien_formado(tablero) and 0 <= pasosConsumidos < MAX_PASOS:
-        return True
-    else: 
-        return False 
+    return (tablero_bien_formado(j.tablero) and j.pasos_consumidos >= 0 and j.pasos_consumidos < MAX_PASOS)
+
+#### Ejercicio 2
+
+def posicion_vecina_hacia(pos : Posicion, d : Direccion) -> Posicion:
+    """
+    Devuelve la posición contigua a *pos* en la dirección *d*. El resultado
+    puede caer fuera del tablero.
+ 
+    PRE: True
+ 
+    Args:
+        pos (Posicion): La posición de partida.
+        d (Direccion): La dirección en la que se avanza una casilla.
+ 
+    Returns:
+        La posición vecina: NORTE suma una fila, SUR la resta, ESTE suma una
+        columna y OESTE la resta.
+    """
+    fila: int = pos.fila
+    columna: int = pos.columna
+    if d == NORTE:
+        fila = fila + 1
+    elif d == SUR:
+        fila = fila - 1
+    elif d == ESTE:
+        columna = columna + 1
+    else:
+        columna = columna - 1
+    return Posicion(fila, columna)
+
+def casilla_en_posicion(t : Tablero, p : Posicion) -> Casilla:
+    """
+    Devuelve el contenido de la casilla ubicada en la posición *p*.
+ 
+    PRE: tablero_bien_formado(t) y posicion_en_tablero(p)
+ 
+    Args:
+        t (Tablero): El tablero a consultar.
+        p (Posicion): La posición de la casilla.
+ 
+    Returns:
+        VACIA si la casilla no tiene pieza, o la Pieza que la ocupa.
+    """
+    return t[p.fila][p.columna]
+
+def hay_casilla_vacia(t : Tablero, pos : Posicion) -> bool:
+    """
+    Indica si la posición *pos* pertenece al tablero y su casilla está vacía.
+ 
+    PRE: tablero_bien_formado(t)
+        
+    Args:
+        t (Tablero): El tablero a consultar.
+        pos (Posicion): La posición de la casilla.
+ 
+    Returns:
+        True si *pos* está en el tablero y su casilla está vacía. Si la casilla
+        tiene una pieza, o *pos* está fuera del tablero, devuelve False.
+    """
+    return posicion_en_tablero(pos) and casilla_en_posicion(t, pos) == VACIA
+
+def hay_pieza_de_color(t : Tablero, pos : Posicion, col : Color) -> bool:
+    """
+    Indica si en la posición *pos* hay una pieza del color *col*, sea cual
+    sea su figura.
+ 
+    PRE: tablero_bien_formado(t)
+         (más débil que el del enunciado, que además pide posicion_en_tablero(pos):
+         las funciones *_hacia la llaman con vecinas que pueden estar fuera del tablero)
+ 
+    Args:
+        t (Tablero): El tablero a consultar.
+        pos (Posicion): La posición a consultar.
+        col (Color): El color buscado.
+ 
+    Returns:
+        True si en *pos* hay una pieza de color *col*. Si la casilla está vacía,
+        tiene una pieza del otro color o *pos* está fuera del tablero, devuelve False.
+    """
+    return (posicion_en_tablero(pos) and not hay_casilla_vacia(t, pos)
+            and casilla_en_posicion(t, pos).color == col)
+
 
 #### Ejercicio 2
 
@@ -152,8 +219,7 @@ def hay_pieza_de_color(t : Tablero, pos : Posicion, col : Color) -> bool:
 
 #### Ejercicio 3
 
-def hay_casilla_vacia_hacia(
-    t: Tablero, pos: Posicion, d: Direccion) -> bool:
+def hay_casilla_vacia_hacia(t: Tablero, pos: Posicion, d: Direccion) -> bool:
     """
     Indica si la casilla vecina en la dirección d está vacía.
     """
@@ -162,6 +228,7 @@ def hay_casilla_vacia_hacia(
         posicion_en_tablero(vecina)
         and t[vecina.fila][vecina.columna] == VACIA
     )
+    
 def hay_pieza_amiga_vecina(t: Tablero, pos: Posicion) -> bool:
     """
     Indica si la pieza en pos tiene una pieza amiga vecina.
@@ -178,6 +245,7 @@ def hay_pieza_amiga_vecina(t: Tablero, pos: Posicion) -> bool:
             if casilla != VACIA and casilla.color == pieza.color:
                 encontrada = True
     return encontrada
+    
 def hay_pieza_enemiga_mas_debil_hacia(
     t: Tablero, pos: Posicion, d: Direccion) -> bool:
     """
@@ -194,6 +262,7 @@ def hay_pieza_enemiga_mas_debil_hacia(
                 casilla.color != pieza.color
                 and fuerza(casilla.figura) < fuerza(pieza.figura))
     return encontrada
+        
 def hay_pieza_enemiga_mas_fuerte_vecina(
     t: Tablero, pos: Posicion) -> bool:
     """
