@@ -178,7 +178,17 @@ def hay_pieza_de_color(t : Tablero, pos : Posicion, col : Color) -> bool:
 
 def hay_casilla_vacia_hacia(t: Tablero, pos: Posicion, d: Direccion) -> bool:
     """
-    Indica si la casilla vecina en la dirección d está vacía.
+    Indica si la casilla vecina de la posición *pos* en dirección *d* está vacía.
+
+    PRE: El tablero *t* tiene que ser válido y la posición *pos* tiene que existir en el tablero. 
+
+    Args: 
+        t (Tablero): El tablero a consultar. 
+        pos (Posición): La posición de la que se quiere consultar su casilla vecina. 
+        d (Dirección): La dirección de la casilla vecina respecto de *pos*
+    
+    Returns: 
+        True si la posición vecina de *pos* en dirección *d* está vacía, False si no . 
     """
     vecina: Posicion = Posicion(*posicion_vecina_hacia(pos, d))
     return (
@@ -188,8 +198,17 @@ def hay_casilla_vacia_hacia(t: Tablero, pos: Posicion, d: Direccion) -> bool:
     
 def hay_pieza_amiga_vecina(t: Tablero, pos: Posicion) -> bool:
     """
-    Indica si la pieza en pos tiene una pieza amiga vecina.
-    Precondición: la casilla pos contiene una pieza.
+    Indica si la pieza en posición *pos* tiene una pieza amiga vecina.
+    
+    PRE: El tablero *t* está bien formado, la posición *pos* existe en el tablero y en la casilla indicada por *pos*
+    hay una pieza. 
+
+    Args: 
+        t(Tablero): El tablero a consultar. 
+        pos(Posición): La posición de la pieza de la cual se quiere saber si tiene una pieza amiga vecina.
+
+    Returns: 
+        True si la pieza en posición *pos* tiene una pieza amiga vecina, False si no. 
     """
     pieza: Casilla = t[pos.fila][pos.columna]
     encontrada: bool = False
@@ -206,8 +225,18 @@ def hay_pieza_amiga_vecina(t: Tablero, pos: Posicion) -> bool:
 def hay_pieza_enemiga_mas_debil_hacia(
     t: Tablero, pos: Posicion, d: Direccion) -> bool:
     """
-    Indica si en dirección d hay una pieza enemiga más débil.
-    Precondición: la casilla pos contiene una pieza.
+    Indica si en dirección *d* hay una pieza enemiga más débil.
+
+    PRE: El tablero *t* está bien formado, la posición *pos* existe en el tablero y en la casilla indicada por *pos*
+    hay una pieza. 
+
+    Args: 
+        t (Tablero): El tablero a consultar. 
+        pos (Posición): La posición de la pieza de la cual se quiere saber si tiene una pieza enemiga más débil vecina. 
+        d (Dirección): La dirección en la que se quiere consultar si hay una pieza enemiga más débil. 
+     
+    Returns: 
+        True si la pieza en dirección *d* respecto de la posición *pos* es una pieza enemiga más débil que la pieza en  *pos* 
     """
     pieza: Casilla = t[pos.fila][pos.columna]
     vecina: Posicion = Posicion(*posicion_vecina_hacia(pos, d))
@@ -223,8 +252,19 @@ def hay_pieza_enemiga_mas_debil_hacia(
 def hay_pieza_enemiga_mas_fuerte_vecina(
     t: Tablero, pos: Posicion) -> bool:
     """
-    Indica si la pieza en pos tiene una enemiga más fuerte al lado.
-    Precondición: la casilla pos contiene una pieza.
+    Indica si la pieza en posición *pos* tiene una enemiga más fuerte al lado.
+
+    PRE: El tablero *t* está bien formado, la posición *pos* existe en el tablero y en la casilla indicada por *pos*
+    hay una pieza. 
+
+    Args: 
+        t (Tablero): El tablero a consultar. 
+        pos (Posición): La posición de la pieza de la cual se quiere saber si tiene una pieza enemiga más fuerte vecina. 
+        d (Dirección): La dirección en la que se quiere consultar si hay una pieza enemiga más vecina.
+
+    Returns: 
+        True si la pieza en dirección *d* respecto de la posición *pos* es una pieza enemiga más fuerte que la pieza en *pos* 
+
     """
     pieza: Casilla = t[pos.fila][pos.columna]
     encontrada: bool = False
@@ -237,7 +277,17 @@ def hay_pieza_enemiga_mas_fuerte_vecina(
     return encontrada
 def hay_pieza_congelada(t: Tablero, pos: Posicion) -> bool:
     """
-    Indica si la casilla pos contiene una pieza congelada.
+    Indica si la casilla en posición *pos* contiene una pieza congelada.
+
+    PRE: El tablero *t* está bien formado yla posición *pos* existe en el tablero. 
+
+    Args: 
+        t(Tablero): El tablero a consultar. 
+        pos(Posición): La posición de la pieza de la cual se quiere saber si está congelada. 
+
+    Returns: 
+        True si la pieza en la posición *pos* está congelada, False si no. 
+
     """
     return (
         t[pos.fila][pos.columna] != VACIA
@@ -247,9 +297,17 @@ def hay_pieza_congelada(t: Tablero, pos: Posicion) -> bool:
 #### EJERCICIO 4
 
 def puede_realizar_movimiento(j: Juego, m: Movimiento) -> bool:
-    """
-    Indica si el movimiento puede realizarse en el juego.
-    Precondición: j y m están bien formados.
+   """
+    Indica si el movimiento *m* puede realizarse en el juego.
+
+    PRE: El juego *j* y el movimiento *m* están bien formados. 
+
+    Args: 
+        j(Juego): El juego a consultar. 
+        m(Movimiento): El movimiento a verficar si es válido. 
+    
+    Returns:
+        True si el movimiento *m* es válido para el juego *j*. 
     """
     t: Tablero = j.tablero
     pos: Posicion = m.origen
@@ -289,8 +347,16 @@ def copiar_tablero (t:Tablero) -> Tablero:
 
 def activar_trampas(t : Tablero) -> Tablero:
     """
-    Devuelve el tablero con las posiciones trampa ya activadas 
-    Pre: El tablero tiene que estar bien formado
+    Devuelve el tablero con las posiciones trampa ya activadas. 
+ 
+    PRE: El tablero *t* tiene que estar bien formado
+
+    Args: 
+        t(Tablero): El tablero del cual se quieren activar las trampas. 
+
+    Returns: 
+        El tablero después de haber activado todas las trampas. 
+        
     """
     res: Tablero = copiar_tablero(t)
     trampa: Posicion = ""
