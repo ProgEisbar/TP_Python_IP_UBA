@@ -493,8 +493,69 @@ def activar_trampas(t : Tablero) -> Tablero:
 
 #### Ejercicio 6
 
+# Lleva la pieza del origen al destino y deja vacío el origen.
+# La definí porque el traslado son combinaciones de mover, arrastrar yempujar.
+# Trabaja sobre la copia del tablero, así no se daña el original.
+# Primero escribe el destino y después vacía el origen, para no perder la pieza.
+
+def tablero_trasladando_pieza(t : Tablero, origen : Posicion, destino : Posicion) -> Tablero:
+    res: Tablero = copiar_tablero(t)
+    res[destino.fila][destino.columna] = res[origen.fila][origen.columna]
+    res[origen.fila][origen.columna] = VACIA
+    return res
+
+# Calcula el tablero, elige qué traslados hacer según la acción y activa las trampas.
+# En arrastrar primero avanza la pieza propia y después la enemiga ocupa el hueco que dejó.
+# La enemiga arrastrada está del lado opuesto a pasos[1], por eso se usa opuesta(m.pasos[1]).
+# En empujar destino es lacasilla de la enemiga, que primero se corre al hueco y luego entra la propia.
+# El orden de los traslados importa, siempre se mueve primero la pieza que va a una casilla libre.
+# Las trampas se activan una sola vez, al final, sobre el tablero ya movido.
+
+def tablero_post_movimiento(t : Tablero, m : Movimiento) -> Tablero:
+    destino: Posicion = posicion_vecina_hacia(m.origen, m.pasos[0])
+    resultado: Tablero
+    if m.accion == MOVER_A_SECAS:
+        resultado = tablero_trasladando_pieza(t, m.origen, destino)
+    elif m.accion == ARRASTRAR:
+        pos_enemiga: Posicion = posicion_vecina_hacia(m.origen, opuesta(m.pasos[1]))
+        con_la_propia_movida: Tablero = tablero_trasladando_pieza(t, m.origen, destino)
+        resultado = tablero_trasladando_pieza(con_la_propia_movida, pos_enemiga, m.origen)
+    else:
+        pos_hueco: Posicion = posicion_vecina_hacia(destino, m.pasos[1])
+        con_la_enemiga_empujada: Tablero = tablero_trasladando_pieza(t, destino, pos_hueco)
+        resultado = tablero_trasladando_pieza(con_la_enemiga_empujada, m.origen, destino)
+    return activar_trampas(resultado)
+
+
+# El tablero lo resuelve tablero_post_movimiento esta función solo cuenta los pasos y decide el turno.
+# Cada movimiento consume len(m.pasos): 1 si es a secas y 2 si es arrastrar o empujar. El turno cambia cuando se llega a MAX_PASOS, no antes ni después.
+# pasar_turno ya pone al oponente y los pasos consumidos en 0, por eso no se arma a mano.
+
 def realizar_movimiento(j : Juego, m : Movimiento) -> Juego:
-    raise Exception("No implementado")
+    """
+    Realiza el movimiento *m* en el juego *j*: mueve, arrastra o empuja según
+    la acción, activa las trampas y pasa el turno al oponente si con este
+    movimiento el jugador completa sus MAX_PASOS.
+
+    PRE: juego_bien_formado(j), movimiento_bien_formado(m) y
+         puede_realizar_movimiento(j, m)
+
+    Args:
+        j (Juego): El estado del juego antes del movimiento. No se modifica.
+        m (Movimiento): El movimiento a realizar.
+
+    Returns:
+        Un juego nuevo, bien formado, con el tablero resultante y el turno y
+        los pasos consumidos actualizados.
+    """
+    tablero_final: Tablero = tablero_post_movimiento(j.tablero, m)
+    pasos_totales: int = j.pasos_consumidos + len(m.pasos)
+    resultado: Juego
+    if pasos_totales == MAX_PASOS:
+        resultado = pasar_turno(Juego(tablero_final, j.turno, pasos_totales))
+    else:
+        resultado = Juego(tablero_final, j.turno, pasos_totales)
+    return resultado
 
 #### Ejercicio 7
 
