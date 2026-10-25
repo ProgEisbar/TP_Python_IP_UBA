@@ -450,8 +450,46 @@ def puede_realizar_movimiento(j : Juego, m : Movimiento) -> bool:
  
 #### Ejercicio 5
 
+def copiar_tablero(t : Tablero) -> Tablero:
+    """
+    Devuelve una copia del tablero *t* que no comparte filas con él: modificar
+    la copia no altera a *t*.
+
+    PRE: tablero_bien_formado(t)
+
+    Args:
+        t (Tablero): El tablero a copiar.
+
+    Returns:
+        Un tablero igual a *t* e independiente de *t*.
+    """
+    res: Tablero = []
+    fila: list[Casilla]
+    for fila in t:
+        res.append(fila.copy())
+    return res
+
 def activar_trampas(t : Tablero) -> Tablero:
-    raise Exception("No implementado")
+    """
+    Activa las cuatro casillas trampa sobre el tablero *t*: retira toda pieza
+    ubicada en una trampa que no tenga ninguna pieza de su color al lado. Las
+    trampas se activan de a una, en el orden de POSICIONES_TRAMPA, cada una
+    sobre el tablero que dejó la anterior.
+
+    PRE: tablero_bien_formado(t)
+
+    Args:
+        t (Tablero): El tablero sobre el cual se activan las trampas. No se modifica.
+
+    Returns:
+        Un tablero nuevo, bien formado, igual a *t* salvo por las piezas retiradas.
+    """
+    res: Tablero = copiar_tablero(t)
+    trampa: Posicion
+    for trampa in POSICIONES_TRAMPA:
+        if casilla_en_posicion(res, trampa) != VACIA and not hay_pieza_amiga_vecina(res, trampa):
+            res[trampa.fila][trampa.columna] = VACIA
+    return res
 
 #### Ejercicio 6
 
