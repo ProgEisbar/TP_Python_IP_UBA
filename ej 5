@@ -174,49 +174,6 @@ def hay_pieza_de_color(t : Tablero, pos : Posicion, col : Color) -> bool:
             and casilla_en_posicion(t, pos).color == col)
 
 
-#### Ejercicio 2
-
-def posicion_vecina_hacia(pos : Posicion, d : Direccion) -> Posicion:
-    """
-    Indica la posición vecina de la posición *pos* en dirección *d*. 
-
-    PRE: True
-
-    Args: 
-        pos(Posicion): Posición para la cual se quiere determinar su posición vecina en dirección *d*.
-        d(Dirección): Dirección de la casilla vecina en relación a posición *pos*. 
-
-    Returns: 
-        Posición de la posición vecina en dirección *d*. 
-
-    """
-    (fila,columna) = pos 
-    if d == NORTE: 
-        pos_final = (fila+1,columna)
-    elif d == SUR: 
-        pos_final = (fila-1,columna)
-    elif d == ESTE:
-        pos_final = (fila,columna+1)
-    else: 
-        pos_final = (fila,columna-1)
-    return pos_final 
-
-def casilla_en_posicion(t : Tablero, p : Posicion) -> Casilla:
-    (fila,columna) = p 
-    return t[fila][columna]
-
-def hay_casilla_vacia(t : Tablero, pos : Posicion) -> bool:
-    if casilla_en_posicion(t,pos) == VACIA:
-        return True 
-
-def hay_pieza_de_color(t : Tablero, pos : Posicion, col : Color) -> bool:
-    if not hay_casilla_vacia(t,pos): 
-        (figura,color) = casilla_en_posicion(t,pos)
-        if color == col: 
-            return True
-        else: 
-            return False
-
 #### Ejercicio 3
 
 def hay_casilla_vacia_hacia(t: Tablero, pos: Posicion, d: Direccion) -> bool:
