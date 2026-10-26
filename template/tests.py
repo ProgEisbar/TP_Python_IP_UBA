@@ -206,6 +206,14 @@ class test_hay_casilla_vacia_hacia(unittest.TestCase):
             ])
         self.assertTrue(hay_casilla_vacia_hacia(t, Posicion(0, 0), NORTE))
 
+    def test_casilla_ocupada_o_fuera_del_tablero(self):
+        t = tablero_8x8_vacio()
+        t[0][0] = Pieza(CONEJO, DORADO)
+        t[1][0] = Pieza(CONEJO, PLATEADO)
+
+        self.assertFalse(hay_casilla_vacia_hacia(t, Posicion(0, 0), NORTE))
+        self.assertFalse(hay_casilla_vacia_hacia(t, Posicion(0, 0), SUR))
+
 class test_hay_pieza_amiga_vecina(unittest.TestCase):
 
     def test_hay_pieza_amiga_vecina(self):
@@ -221,6 +229,13 @@ class test_hay_pieza_amiga_vecina(unittest.TestCase):
               #01234567
             ])
         self.assertTrue(hay_pieza_amiga_vecina(t, Posicion(4, 3)))
+
+    def test_no_hay_pieza_amiga_vecina(self):
+        t = tablero_8x8_vacio()
+        t[0][0] = Pieza(GATO, DORADO)
+        t[0][1] = Pieza(GATO, PLATEADO)
+
+        self.assertFalse(hay_pieza_amiga_vecina(t, Posicion(0, 0)))
 
 class test_hay_pieza_enemiga_mas_debil_hacia(unittest.TestCase):
 
@@ -238,6 +253,14 @@ class test_hay_pieza_enemiga_mas_debil_hacia(unittest.TestCase):
             ])
         self.assertTrue(hay_pieza_enemiga_mas_debil_hacia(t, Posicion(1, 3), OESTE))
 
+    def test_no_hay_enemiga_mas_debil(self):
+        t = tablero_8x8_vacio()
+        t[3][3] = Pieza(CABALLO, DORADO)
+        t[3][4] = Pieza(CABALLO, PLATEADO)
+
+        self.assertFalse(hay_pieza_enemiga_mas_debil_hacia(t, Posicion(3, 3), ESTE))
+        self.assertFalse(hay_pieza_enemiga_mas_debil_hacia(t, Posicion(3, 3), NORTE))
+
 class test_hay_pieza_enemiga_mas_fuerte_vecina(unittest.TestCase):
 
     def test_hay_pieza_enemiga_mas_fuerte_vecina(self):
@@ -254,6 +277,14 @@ class test_hay_pieza_enemiga_mas_fuerte_vecina(unittest.TestCase):
             ])
         self.assertTrue(hay_pieza_enemiga_mas_fuerte_vecina(t, Posicion(3, 1)))
 
+    def test_no_hay_enemiga_mas_fuerte_vecina(self):
+        t = tablero_8x8_vacio()
+        t[3][3] = Pieza(CABALLO, DORADO)
+        t[3][4] = Pieza(PERRO, PLATEADO)
+        t[4][3] = Pieza(ELEFANTE, DORADO)
+
+        self.assertFalse(hay_pieza_enemiga_mas_fuerte_vecina(t, Posicion(3, 3)))
+
 class test_hay_pieza_congelada(unittest.TestCase):
 
     def test_hay_pieza_congelada(self):
@@ -269,6 +300,15 @@ class test_hay_pieza_congelada(unittest.TestCase):
               #01234567
             ])
         self.assertTrue(hay_pieza_congelada(t, Posicion(6, 1)))
+
+    def test_una_amiga_vecina_descongela_la_pieza(self):
+        t = tablero_8x8_vacio()
+        t[3][3] = Pieza(GATO, DORADO)
+        t[3][4] = Pieza(ELEFANTE, PLATEADO)
+        t[3][2] = Pieza(CONEJO, DORADO)
+
+        self.assertFalse(hay_pieza_congelada(t, Posicion(3, 3)))
+        self.assertFalse(hay_pieza_congelada(t, Posicion(0, 0)))
 
 #### Ejercicio 4
 
@@ -289,6 +329,76 @@ class test_puede_realizar_movimiento(unittest.TestCase):
         j = Juego(t, PLATEADO, 0)
         m = Movimiento(MOVER_A_SECAS, Posicion(0, 1), [NORTE])
         self.assertTrue(puede_realizar_movimiento(j, m))
+
+    def test_no_puede_mover_una_pieza_del_oponente(self):
+        t = tablero_8x8_vacio()
+        t[3][3] = Pieza(GATO, PLATEADO)
+        j = Juego(t, DORADO, 0)
+        m = Movimiento(MOVER_A_SECAS, Posicion(3, 3), [NORTE])
+
+        self.assertFalse(puede_realizar_movimiento(j, m))
+
+    def test_conejo_dorado_no_puede_retroceder(self):
+        t = tablero_8x8_vacio()
+        t[3][3] = Pieza(CONEJO, DORADO)
+        j = Juego(t, DORADO, 0)
+        m = Movimiento(MOVER_A_SECAS, Posicion(3, 3), [SUR])
+
+        self.assertFalse(puede_realizar_movimiento(j, m))
+
+    def test_conejo_plateado_no_puede_retroceder(self):
+        t = tablero_8x8_vacio()
+        t[3][3] = Pieza(CONEJO, PLATEADO)
+        j = Juego(t, PLATEADO, 0)
+        m = Movimiento(MOVER_A_SECAS, Posicion(3, 3), [NORTE])
+
+        self.assertFalse(puede_realizar_movimiento(j, m))
+
+    def test_no_puede_mover_si_supera_los_pasos_del_turno(self):
+        t = tablero_8x8_vacio()
+        t[3][3] = Pieza(ELEFANTE, DORADO)
+        t[3][2] = Pieza(CONEJO, PLATEADO)
+        j = Juego(t, DORADO, 3)
+        m = Movimiento(ARRASTRAR, Posicion(3, 3), [NORTE, ESTE])
+
+        self.assertFalse(puede_realizar_movimiento(j, m))
+
+    def test_no_puede_mover_una_pieza_congelada(self):
+        t = tablero_8x8_vacio()
+        t[3][3] = Pieza(GATO, DORADO)
+        t[3][4] = Pieza(ELEFANTE, PLATEADO)
+        j = Juego(t, DORADO, 0)
+        m = Movimiento(MOVER_A_SECAS, Posicion(3, 3), [NORTE])
+
+        self.assertFalse(puede_realizar_movimiento(j, m))
+
+    def test_puede_arrastrar_una_pieza_enemiga_mas_debil(self):
+        t = tablero_8x8_vacio()
+        t[3][3] = Pieza(ELEFANTE, DORADO)
+        t[3][2] = Pieza(CONEJO, PLATEADO)
+        j = Juego(t, DORADO, 0)
+        m = Movimiento(ARRASTRAR, Posicion(3, 3), [NORTE, ESTE])
+
+        self.assertTrue(puede_realizar_movimiento(j, m))
+
+    def test_puede_empujar_una_pieza_enemiga_mas_debil(self):
+        t = tablero_8x8_vacio()
+        t[3][3] = Pieza(ELEFANTE, DORADO)
+        t[4][3] = Pieza(CONEJO, PLATEADO)
+        j = Juego(t, DORADO, 0)
+        m = Movimiento(EMPUJAR, Posicion(3, 3), [NORTE, ESTE])
+
+        self.assertTrue(puede_realizar_movimiento(j, m))
+
+    def test_no_puede_empujar_si_el_destino_esta_ocupado(self):
+        t = tablero_8x8_vacio()
+        t[3][3] = Pieza(ELEFANTE, DORADO)
+        t[4][3] = Pieza(CONEJO, PLATEADO)
+        t[4][4] = Pieza(GATO, DORADO)
+        j = Juego(t, DORADO, 0)
+        m = Movimiento(EMPUJAR, Posicion(3, 3), [NORTE, ESTE])
+
+        self.assertFalse(puede_realizar_movimiento(j, m))
 
 #### Ejercicio 5
 
@@ -373,4 +483,5 @@ class test_ganador_del_juego(unittest.TestCase):
         j = Juego(t, PLATEADO, 0)
         self.assertTrue(hay_ganador_determinado(j))
         self.assertEqual(ganador_del_juego(j), DORADO)
+
 
