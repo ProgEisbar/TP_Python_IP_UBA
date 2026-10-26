@@ -565,3 +565,4 @@ def hay_ganador_determinado(j : Juego) -> bool:
 def ganador_del_juego(j : Juego) -> Color:
     raise Exception("No implementado")
 
+
