@@ -362,12 +362,16 @@ def puede_realizar_movimiento(j: Juego, m: Movimiento) -> bool:
         and puede_realizar_accion(j.tablero, m)
     )
 #### Ejercicio 5
-def copiar_tablero (t:Tablero) -> Tablero:
+
+def copiar_tablero(t: Tablero) -> Tablero:
+    """Devuelve una copia de t que no comparte filas con el tablero original."""
     res: Tablero = []
-    fila: list[Casilla] 
+    fila: list[Casilla]
+
     for fila in t:
-        res.appned(fila.copy())
-        return res
+        res.append(fila.copy())
+
+    return res
 
 def activar_trampas(t : Tablero) -> Tablero:
     """
@@ -383,17 +387,71 @@ def activar_trampas(t : Tablero) -> Tablero:
         
     """
     res: Tablero = copiar_tablero(t)
-    trampa: Posicion = ""
+    trampa: Posicion
+
     for trampa in POSICIONES_TRAMPA:
-        if casilla_en_posicion(res, trampa) != VACIA and not hay_pieza_amiga_vecina (res, trampa):
+        if (
+            casilla_en_posicion(res, trampa) != VACIA
+            and not hay_pieza_amiga_vecina(res, trampa)
+        ):
             res[trampa.fila][trampa.columna] = VACIA
+
     return res
 
 
 #### Ejercicio 6
 
-def realizar_movimiento(j : Juego, m : Movimiento) -> Juego:
-    raise Exception("No implementado")
+def tablero_trasladando_pieza(
+    t: Tablero, origen: Posicion, destino: Posicion
+) -> Tablero:
+    """Devuelve una copia de t con la pieza de origen trasladada a destino."""
+    res: Tablero = copiar_tablero(t)
+    res[destino.fila][destino.columna] = res[origen.fila][origen.columna]
+    res[origen.fila][origen.columna] = VACIA
+    return res
+
+
+def tablero_post_movimiento(t: Tablero, m: Movimiento) -> Tablero:
+    """Devuelve el tablero resultante de m luego de activar las trampas."""
+    destino: Posicion = posicion_vecina_hacia(m.origen, m.pasos[0])
+    resultado: Tablero
+
+    if m.accion == MOVER_A_SECAS:
+        resultado = tablero_trasladando_pieza(t, m.origen, destino)
+    elif m.accion == ARRASTRAR:
+        pos_enemiga: Posicion = posicion_vecina_hacia(
+            m.origen, opuesta(m.pasos[1])
+        )
+        con_la_propia_movida: Tablero = tablero_trasladando_pieza(
+            t, m.origen, destino
+        )
+        resultado = tablero_trasladando_pieza(
+            con_la_propia_movida, pos_enemiga, m.origen
+        )
+    else:
+        pos_hueco: Posicion = posicion_vecina_hacia(destino, m.pasos[1])
+        con_la_enemiga_empujada: Tablero = tablero_trasladando_pieza(
+            t, destino, pos_hueco
+        )
+        resultado = tablero_trasladando_pieza(
+            con_la_enemiga_empujada, m.origen, destino
+        )
+
+    return activar_trampas(resultado)
+
+
+def realizar_movimiento(j: Juego, m: Movimiento) -> Juego:
+    """Realiza m, activa las trampas y actualiza turno y pasos del juego.
+
+    Precondición: puede_realizar_movimiento(j, m).
+    """
+    tablero_final: Tablero = tablero_post_movimiento(j.tablero, m)
+    pasos_totales: int = j.pasos_consumidos + len(m.pasos)
+
+    if pasos_totales == MAX_PASOS:
+        return pasar_turno(Juego(tablero_final, j.turno, pasos_totales))
+
+    return Juego(tablero_final, j.turno, pasos_totales)
 
 #### Ejercicio 7
 
@@ -402,6 +460,7 @@ def hay_ganador_determinado(j : Juego) -> bool:
 
 def ganador_del_juego(j : Juego) -> Color:
     raise Exception("No implementado")
+
 
 
 

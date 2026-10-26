@@ -431,6 +431,15 @@ class test_activar_trampas(unittest.TestCase):
         self.assertNotEqual(t0, t1)
         self.assertEqual(t2, t1)
 
+    def test_la_trampa_no_modifica_el_tablero_original(self):
+        t = tablero_8x8_vacio()
+        t[2][2] = Pieza(GATO, DORADO)
+
+        resultado = activar_trampas(t)
+
+        self.assertEqual(t[2][2], Pieza(GATO, DORADO))
+        self.assertEqual(resultado[2][2], VACIA)
+
 #### Ejercicio 6
 
 class test_realizar_movimiento(unittest.TestCase):
@@ -464,6 +473,46 @@ class test_realizar_movimiento(unittest.TestCase):
         self.assertTrue(puede_realizar_movimiento(j0, mN))
         self.assertEqual(realizar_movimiento(j0, mN), jN)
 
+    def test_arrastrar(self):
+        t = tablero_8x8_vacio()
+        t[3][3] = Pieza(ELEFANTE, DORADO)
+        t[3][2] = Pieza(CONEJO, PLATEADO)
+        esperado = tablero_8x8_vacio()
+        esperado[4][3] = Pieza(ELEFANTE, DORADO)
+        esperado[3][3] = Pieza(CONEJO, PLATEADO)
+        j = Juego(t, DORADO, 0)
+        m = Movimiento(ARRASTRAR, Posicion(3, 3), [NORTE, ESTE])
+
+        self.assertEqual(
+            realizar_movimiento(j, m), Juego(esperado, DORADO, 2)
+        )
+
+    def test_empujar(self):
+        t = tablero_8x8_vacio()
+        t[3][3] = Pieza(ELEFANTE, DORADO)
+        t[4][3] = Pieza(CONEJO, PLATEADO)
+        esperado = tablero_8x8_vacio()
+        esperado[4][3] = Pieza(ELEFANTE, DORADO)
+        esperado[4][4] = Pieza(CONEJO, PLATEADO)
+        j = Juego(t, DORADO, 0)
+        m = Movimiento(EMPUJAR, Posicion(3, 3), [NORTE, ESTE])
+
+        self.assertEqual(
+            realizar_movimiento(j, m), Juego(esperado, DORADO, 2)
+        )
+
+    def test_cuarto_paso_cambia_el_turno(self):
+        t = tablero_8x8_vacio()
+        t[3][3] = Pieza(GATO, DORADO)
+        esperado = tablero_8x8_vacio()
+        esperado[4][3] = Pieza(GATO, DORADO)
+        j = Juego(t, DORADO, 3)
+        m = Movimiento(MOVER_A_SECAS, Posicion(3, 3), [NORTE])
+
+        self.assertEqual(
+            realizar_movimiento(j, m), Juego(esperado, PLATEADO, 0)
+        )
+
 #### Ejercicio 7
 
 class test_ganador_del_juego(unittest.TestCase):
@@ -483,5 +532,6 @@ class test_ganador_del_juego(unittest.TestCase):
         j = Juego(t, PLATEADO, 0)
         self.assertTrue(hay_ganador_determinado(j))
         self.assertEqual(ganador_del_juego(j), DORADO)
+
 
 
