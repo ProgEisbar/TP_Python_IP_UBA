@@ -190,11 +190,7 @@ def hay_casilla_vacia_hacia(t: Tablero, pos: Posicion, d: Direccion) -> bool:
     Returns: 
         True si la posición vecina de *pos* en dirección *d* está vacía, False si no . 
     """
-    vecina: Posicion = Posicion(*posicion_vecina_hacia(pos, d))
-    return (
-        posicion_en_tablero(vecina)
-        and t[vecina.fila][vecina.columna] == VACIA
-    )
+    return hay_casilla_vacia(t, posicion_vecina_hacia(pos, d))
     
 def hay_pieza_amiga_vecina(t: Tablero, pos: Posicion) -> bool:
     """
@@ -213,9 +209,7 @@ def hay_pieza_amiga_vecina(t: Tablero, pos: Posicion) -> bool:
     pieza: Casilla = t[pos.fila][pos.columna]
     encontrada: bool = False
     for direccion in [NORTE, SUR, ESTE, OESTE]:
-        vecina: Posicion = Posicion(
-            *posicion_vecina_hacia(pos, direccion)
-        )
+        vecina: Posicion = posicion_vecina_hacia(pos, direccion)
         if posicion_en_tablero(vecina):
             casilla: Casilla = t[vecina.fila][vecina.columna]
             if casilla != VACIA and casilla.color == pieza.color:
@@ -239,7 +233,7 @@ def hay_pieza_enemiga_mas_debil_hacia(
         True si la pieza en dirección *d* respecto de la posición *pos* es una pieza enemiga más débil que la pieza en  *pos* 
     """
     pieza: Casilla = t[pos.fila][pos.columna]
-    vecina: Posicion = Posicion(*posicion_vecina_hacia(pos, d))
+    vecina: Posicion = posicion_vecina_hacia(pos, d)
     encontrada: bool = False
     if posicion_en_tablero(vecina):
         casilla: Casilla = t[vecina.fila][vecina.columna]
@@ -269,7 +263,7 @@ def hay_pieza_enemiga_mas_fuerte_vecina(
     pieza: Casilla = t[pos.fila][pos.columna]
     encontrada: bool = False
     for direccion in [NORTE, SUR, ESTE, OESTE]:
-        vecina: Posicion = Posicion(*posicion_vecina_hacia(pos, direccion))
+        vecina: Posicion = posicion_vecina_hacia(pos, direccion)
         if posicion_en_tablero(vecina):
             casilla: Casilla = t[vecina.fila][vecina.columna]
             if casilla != VACIA:
@@ -296,8 +290,57 @@ def hay_pieza_congelada(t: Tablero, pos: Posicion) -> bool:
 
 #### EJERCICIO 4
 
+def direccion_de_movimiento_habilitada(
+    t: Tablero, pos: Posicion, d: Direccion
+) -> bool:
+    """Indica si la pieza en pos puede moverse hacia d.
+
+    Precondición: hay una pieza en pos.
+    """
+    pieza: Casilla = casilla_en_posicion(t, pos)
+    return not (
+        (pieza == Pieza(CONEJO, DORADO) and d == SUR)
+        or (pieza == Pieza(CONEJO, PLATEADO) and d == NORTE)
+    )
+
+
+def puede_arrastrar(
+    t: Tablero, pos: Posicion, d: Direccion, d_arrastre: Direccion
+) -> bool:
+    """Indica si la pieza en pos puede arrastrar según las direcciones dadas."""
+    return (
+        hay_casilla_vacia_hacia(t, pos, d)
+        and hay_pieza_enemiga_mas_debil_hacia(t, pos, opuesta(d_arrastre))
+    )
+
+
+def puede_empujar(
+    t: Tablero, pos: Posicion, d: Direccion, d_empuje: Direccion
+) -> bool:
+    """Indica si la pieza en pos puede empujar según las direcciones dadas."""
+    enemiga: Posicion = posicion_vecina_hacia(pos, d)
+    return (
+        hay_pieza_enemiga_mas_debil_hacia(t, pos, d)
+        and hay_casilla_vacia_hacia(t, enemiga, d_empuje)
+    )
+
+
+def puede_realizar_accion(t: Tablero, m: Movimiento) -> bool:
+    """Indica si las casillas permiten realizar la acción de m."""
+    puede: bool
+
+    if m.accion == MOVER_A_SECAS:
+        puede = hay_casilla_vacia_hacia(t, m.origen, m.pasos[0])
+    elif m.accion == ARRASTRAR:
+        puede = puede_arrastrar(t, m.origen, m.pasos[0], m.pasos[1])
+    else:
+        puede = puede_empujar(t, m.origen, m.pasos[0], m.pasos[1])
+
+    return puede
+
+
 def puede_realizar_movimiento(j: Juego, m: Movimiento) -> bool:
-   """
+    """
     Indica si el movimiento *m* puede realizarse en el juego.
 
     PRE: El juego *j* y el movimiento *m* están bien formados. 
@@ -309,34 +352,15 @@ def puede_realizar_movimiento(j: Juego, m: Movimiento) -> bool:
     Returns:
         True si el movimiento *m* es válido para el juego *j*. 
     """
-    t: Tablero = j.tablero
-    pos: Posicion = m.origen
-    pieza: Casilla = t[pos.fila][pos.columna]
-    puede: bool = False
-    if pieza != VACIA and pieza.color == j.turno:
-        direccion_valida: bool = not (
-            pieza.figura == CONEJO
-            and (
-                (pieza.color == DORADO and m.pasos[0] == SUR)
-                or (pieza.color == PLATEADO and m.pasos[0] == NORTE)))
-        if (
-            not hay_pieza_congelada(t, pos)
-            and direccion_valida
-            and j.pasos_consumidos + len(m.pasos) <= MAX_PASOS):
-            if m.accion == MOVER_A_SECAS:
-                puede = hay_casilla_vacia_hacia(t, pos, m.pasos[0])
-            elif m.accion == ARRASTRAR:
-                puede = (
-                    hay_casilla_vacia_hacia(t, pos, m.pasos[0])
-                    and hay_pieza_enemiga_mas_debil_hacia(
-                        t, pos, opuesta(m.pasos[1])))
-            elif m.accion == EMPUJAR:
-                if hay_pieza_enemiga_mas_debil_hacia(t, pos, m.pasos[0]):
-                    enemiga: Posicion = Posicion(
-                        *posicion_vecina_hacia(pos, m.pasos[0])
-                    )
-                    puede = hay_casilla_vacia_hacia(t, enemiga, m.pasos[1])
-    return puede
+    return (
+        hay_pieza_de_color(j.tablero, m.origen, j.turno)
+        and not hay_pieza_congelada(j.tablero, m.origen)
+        and direccion_de_movimiento_habilitada(
+            j.tablero, m.origen, m.pasos[0]
+        )
+        and j.pasos_consumidos + len(m.pasos) <= MAX_PASOS
+        and puede_realizar_accion(j.tablero, m)
+    )
 #### Ejercicio 5
 def copiar_tablero (t:Tablero) -> Tablero:
     res: Tablero = []
@@ -378,5 +402,6 @@ def hay_ganador_determinado(j : Juego) -> bool:
 
 def ganador_del_juego(j : Juego) -> Color:
     raise Exception("No implementado")
+
 
 
