@@ -440,18 +440,31 @@ def tablero_post_movimiento(t: Tablero, m: Movimiento) -> Tablero:
     return activar_trampas(resultado)
 
 
-def realizar_movimiento(j: Juego, m: Movimiento) -> Juego:
-    """Realiza m, activa las trampas y actualiza turno y pasos del juego.
+def realizar_movimiento(j : Juego, m : Movimiento) -> Juego:
+    """
+    Realiza el movimiento *m* en el juego *j*: mueve, arrastra o empuja según
+    la acción, activa las trampas y pasa el turno al oponente si con este
+    movimiento el jugador completa sus MAX_PASOS.
 
-    Precondición: puede_realizar_movimiento(j, m).
+    PRE: juego_bien_formado(j), movimiento_bien_formado(m) y
+         puede_realizar_movimiento(j, m)
+
+    Args:
+        j (Juego): El estado del juego antes del movimiento. No se modifica.
+        m (Movimiento): El movimiento a realizar.
+
+    Returns:
+        Un juego nuevo, bien formado, con el tablero resultante y el turno y
+        los pasos consumidos actualizados.
     """
     tablero_final: Tablero = tablero_post_movimiento(j.tablero, m)
     pasos_totales: int = j.pasos_consumidos + len(m.pasos)
-
+    resultado: Juego
     if pasos_totales == MAX_PASOS:
-        return pasar_turno(Juego(tablero_final, j.turno, pasos_totales))
-
-    return Juego(tablero_final, j.turno, pasos_totales)
+        resultado = pasar_turno(Juego(tablero_final, j.turno, pasos_totales))
+    else:
+        resultado = Juego(tablero_final, j.turno, pasos_totales)
+    return resultado
 
 #### Ejercicio 7
 
