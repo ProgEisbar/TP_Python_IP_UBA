@@ -440,6 +440,64 @@ class test_activar_trampas(unittest.TestCase):
         self.assertEqual(t[2][2], Pieza(GATO, DORADO))
         self.assertEqual(resultado[2][2], VACIA)
 
+class casilla_trampa_con_aliado_vecino(unittest.TestCase):
+    def test_pieza_vecina_dorados(self):
+        t0 = leer_tablero([   
+               '-eRD--dr', #7
+               '--M--R--', #6
+               'H-D--R--', #5
+               '-H---rCr', #4
+               'R-------', #3
+               '--R--H--', #2
+               '--R--E--', #1
+               'c-D---R-', #0
+        ])
+        t1 = leer_tablero([
+               '-eRD--dr', #7
+               '--M--R--', #6
+               'H-D--R--', #5
+               '-H---rCr', #4
+               'R-------', #3
+               '--R--H--', #2
+               '--R--E--', #1
+               'c-D---R-', #0
+        ])
+        t2 = activar_trampas(t0)
+        self.assertEqual(t2,t1)
+
+    def test_pieza_vecina_plateadas(self):
+        t0 = leer_tablero([
+            '-eRD--dr', #7
+            '--m-----', #6
+            'H-dD-rE-', #5
+            '-H---c--', #4
+            'R-------', #3
+            '-rc--hm-', #2
+            '--R--E--', #1
+            'c-D---R-', #0
+            #01234567
+            ])
+        t1 = leer_tablero([
+            '-eRD--dr', #7
+            '--m-----', #6
+            'H-dD-rE-', #5
+            '-H---c--', #4
+            'R-------', #3
+            '-rc--hm-', #2
+            '--R--E--', #1
+            'c-D---R-', #0
+            #01234567
+            ])
+        t2 = activar_trampas(t0)
+        self.assertEqual(t2,t1)
+
+class test_tablero_vacio_igual(unittest.TestCase):
+    def test_tablero_vacio8x8(self):
+        t0= tablero_8x8_vacio()
+        t1=tablero_8x8_vacio()
+        t2= activar_trampas(t0)
+        self.assertEqual(t2,t1)
+    
 #### Ejercicio 6
 
 class test_realizar_movimiento(unittest.TestCase):
@@ -532,6 +590,4 @@ class test_ganador_del_juego(unittest.TestCase):
         j = Juego(t, PLATEADO, 0)
         self.assertTrue(hay_ganador_determinado(j))
         self.assertEqual(ganador_del_juego(j), DORADO)
-
-
 
