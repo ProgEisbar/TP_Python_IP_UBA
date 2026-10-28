@@ -573,6 +573,30 @@ class test_realizar_movimiento(unittest.TestCase):
 
 #### Ejercicio 7
 
+class test_hay_conejo_en_tablero(unittest.TestCase):
+
+    def test_tablero_sin_conejos(self):
+        self.assertFalse(hay_conejo_en_tablero(tablero_8x8_vacio(), DORADO))
+
+    def test_hay_un_conejo_del_color(self):
+        t = tablero_8x8_vacio()
+        t[3][3] = Pieza(CONEJO, DORADO)
+        self.assertTrue(hay_conejo_en_tablero(t, DORADO))
+
+
+class test_hay_conejo_en_fila_inicial_oponente(unittest.TestCase):
+
+    def test_conejo_dorado_en_la_fila_7(self):
+        t = tablero_8x8_vacio()
+        t[7][4] = Pieza(CONEJO, DORADO)
+        self.assertTrue(hay_conejo_en_fila_inicial_oponente(t, DORADO))
+
+    def test_otra_figura_en_la_fila_no_cuenta(self):
+        t = tablero_8x8_vacio()
+        t[7][4] = Pieza(ELEFANTE, DORADO)     
+        self.assertFalse(hay_conejo_en_fila_inicial_oponente(t, DORADO))
+
+
 class test_ganador_del_juego(unittest.TestCase):
 
     def test_promueve_conejo_dorado_turno_del_oponente(self):
