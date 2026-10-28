@@ -442,7 +442,7 @@ class test_activar_trampas(unittest.TestCase):
 
 class casilla_trampa_con_aliado_vecino(unittest.TestCase):
     def test_pieza_vecina_dorados(self):
-        t0 = leer_tablero([   
+        t0:Tablero = leer_tablero([   
                '-eRD--dr', #7
                '--M--R--', #6
                'H-D--R--', #5
@@ -452,7 +452,7 @@ class casilla_trampa_con_aliado_vecino(unittest.TestCase):
                '--R--E--', #1
                'c-D---R-', #0
         ])
-        t1 = leer_tablero([
+        t1:Tablero = leer_tablero([
                '-eRD--dr', #7
                '--M--R--', #6
                'H-D--R--', #5
@@ -462,11 +462,11 @@ class casilla_trampa_con_aliado_vecino(unittest.TestCase):
                '--R--E--', #1
                'c-D---R-', #0
         ])
-        t2 = activar_trampas(t0)
+        t2:Tablero = activar_trampas(t0)
         self.assertEqual(t2,t1)
 
     def test_pieza_vecina_plateadas(self):
-        t0 = leer_tablero([
+        t0:Tablero = leer_tablero([
             '-eRD--dr', #7
             '--m-----', #6
             'H-dD-rE-', #5
@@ -477,7 +477,7 @@ class casilla_trampa_con_aliado_vecino(unittest.TestCase):
             'c-D---R-', #0
             #01234567
             ])
-        t1 = leer_tablero([
+        t1:Tablero = leer_tablero([
             '-eRD--dr', #7
             '--m-----', #6
             'H-dD-rE-', #5
@@ -488,7 +488,7 @@ class casilla_trampa_con_aliado_vecino(unittest.TestCase):
             'c-D---R-', #0
             #01234567
             ])
-        t2 = activar_trampas(t0)
+        t2:Tablero = activar_trampas(t0)
         self.assertEqual(t2,t1)
 
 class test_tablero_vacio_igual(unittest.TestCase):
@@ -570,32 +570,8 @@ class test_realizar_movimiento(unittest.TestCase):
         self.assertEqual(
             realizar_movimiento(j, m), Juego(esperado, PLATEADO, 0)
         )
-
+ 
 #### Ejercicio 7
-
-class test_hay_conejo_en_tablero(unittest.TestCase):
-
-    def test_tablero_sin_conejos(self):
-        self.assertFalse(hay_conejo_en_tablero(tablero_8x8_vacio(), DORADO))
-
-    def test_hay_un_conejo_del_color(self):
-        t = tablero_8x8_vacio()
-        t[3][3] = Pieza(CONEJO, DORADO)
-        self.assertTrue(hay_conejo_en_tablero(t, DORADO))
-
-
-class test_hay_conejo_en_fila_inicial_oponente(unittest.TestCase):
-
-    def test_conejo_dorado_en_la_fila_7(self):
-        t = tablero_8x8_vacio()
-        t[7][4] = Pieza(CONEJO, DORADO)
-        self.assertTrue(hay_conejo_en_fila_inicial_oponente(t, DORADO))
-
-    def test_otra_figura_en_la_fila_no_cuenta(self):
-        t = tablero_8x8_vacio()
-        t[7][4] = Pieza(ELEFANTE, DORADO)     
-        self.assertFalse(hay_conejo_en_fila_inicial_oponente(t, DORADO))
-
 
 class test_ganador_del_juego(unittest.TestCase):
 
@@ -615,3 +591,32 @@ class test_ganador_del_juego(unittest.TestCase):
         self.assertTrue(hay_ganador_determinado(j))
         self.assertEqual(ganador_del_juego(j), DORADO)
 
+    def test_conejo_ganador_plateado_fila_0(self):
+        t:Tablero = leer_tablero ([
+            'r-----rr',
+            'c-----me',
+            '---Ed-R-',
+            '-M---R--',
+            '---R----',
+            '-rrrr---',
+            '-H---DCC',
+            'R-r---RR', 
+        ])
+        j:Juego = Juego(t,PLATEADO,0)
+        self.assertTrue(hay_ganador_determinado(j))
+        self.assertEqual(ganador_del_juego(j),PLATEADO)
+
+    def test_ganador_dorado_por_eliminación(self):
+        t:Tablero= leer_tablero([
+            '---e--m-',
+            'R-E-----',
+            'd---d--c',
+            'M---E-R-',
+            'R--R--D-',
+            '-R-D-H--',
+            '--h--H-R',
+            '--C--R-C'
+        ])
+        j:Juego = Juego(t,DORADO,0)
+        self.assertTrue(hay_ganador_determinado(j))
+        self.assertEqual(ganador_del_juego(j),DORADO)
