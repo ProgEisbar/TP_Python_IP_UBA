@@ -455,11 +455,73 @@ def realizar_movimiento(j: Juego, m: Movimiento) -> Juego:
 
 #### Ejercicio 7
 
-def hay_ganador_determinado(j : Juego) -> bool:
-    raise Exception("No implementado")
+def hay_conejo_en_tablero(t: Tablero, col: Color) -> bool:
+    """Indica si queda al menos un conejo del color col en el tablero."""
+    hay_conejo: bool = False
+    fila: list[Casilla]
+
+    for fila in t:
+        casilla: Casilla
+
+        for casilla in fila:
+            if (
+                casilla != VACIA
+                and casilla.figura == CONEJO
+                and casilla.color == col
+            ):
+                hay_conejo = True
+
+    return hay_conejo
+
+
+def hay_conejo_en_fila_inicial_oponente(
+    t: Tablero, col: Color
+) -> bool:
+    """Indica si un conejo de col llegó a la fila inicial de su oponente."""
+    fila_objetivo: int = 0
+    hay_conejo: bool = False
+    casilla: Casilla
+
+    if col == DORADO:
+        fila_objetivo = ALTO - 1
+
+    for casilla in t[fila_objetivo]:
+        if (
+            casilla != VACIA
+            and casilla.figura == CONEJO
+            and casilla.color == col
+        ):
+            hay_conejo = True
+
+    return hay_conejo
+
+def reune_condiciones_de_ganar(j: Juego, col: Color) -> bool:
+    """Indica si el color col cumple alguna condición de victoria."""
+    return (
+        hay_conejo_en_fila_inicial_oponente(j.tablero, col)
+        or not hay_conejo_en_tablero(j.tablero, oponente(col))
+    )
+
+def hay_ganador_determinado(j: Juego) -> bool:
+    """Indica si existe un ganador determinado al inicio de un turno."""
+    return (
+        j.pasos_consumidos == 0
+        and (
+            reune_condiciones_de_ganar(j, DORADO)
+            or reune_condiciones_de_ganar(j, PLATEADO)
+        ))
+    
 
 def ganador_del_juego(j : Juego) -> Color:
-    raise Exception("No implementado")
+    """
+    Devuelve el color ganador del juego.
+    Precondición: hay_ganador_determinado(j).  
+    """  
+    jugador_anterior: Color = oponente(j.turno)
+    ganador: Color = j.turno
+    if reune_condiciones_de_ganar(j, jugador_anterior):
+        ganador = jugador_anterior
+    return ganador
 
 
 
