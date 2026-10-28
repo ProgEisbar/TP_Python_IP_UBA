@@ -125,7 +125,7 @@ def casilla_en_posicion(t : Tablero, p : Posicion) -> Casilla:
     """
     Devuelve el contenido de la casilla ubicada en la posición *p*.
  
-    PRE: tablero_bien_formado(t) y posicion_en_tablero(p)
+    PRE: El tablero *t* está bien formado y *p* es una posición que existe en el tablero. 
  
     Args:
         t (Tablero): El tablero a consultar.
@@ -157,9 +157,7 @@ def hay_pieza_de_color(t : Tablero, pos : Posicion, col : Color) -> bool:
     Indica si en la posición *pos* hay una pieza del color *col*, sea cual
     sea su figura.
  
-    PRE: tablero_bien_formado(t)
-         (más débil que el del enunciado, que además pide posicion_en_tablero(pos):
-         las funciones *_hacia la llaman con vecinas que pueden estar fuera del tablero)
+    PRE: El tablero *t* está bien formado y *pos* existe en el tablero. 
  
     Args:
         t (Tablero): El tablero a consultar.
@@ -273,7 +271,7 @@ def hay_pieza_congelada(t: Tablero, pos: Posicion) -> bool:
     """
     Indica si la casilla en posición *pos* contiene una pieza congelada.
 
-    PRE: El tablero *t* está bien formado yla posición *pos* existe en el tablero. 
+    PRE: El tablero *t* está bien formado y la posición *pos* existe en el tablero. 
 
     Args: 
         t(Tablero): El tablero a consultar. 
@@ -293,10 +291,7 @@ def hay_pieza_congelada(t: Tablero, pos: Posicion) -> bool:
 def direccion_de_movimiento_habilitada(
     t: Tablero, pos: Posicion, d: Direccion
 ) -> bool:
-    """Indica si la pieza en pos puede moverse hacia d.
-
-    Precondición: hay una pieza en pos.
-    """
+    """Indica si la pieza en pos puede moverse hacia d."""
     pieza: Casilla = casilla_en_posicion(t, pos)
     return not (
         (pieza == Pieza(CONEJO, DORADO) and d == SUR)
@@ -380,7 +375,7 @@ def activar_trampas(t : Tablero) -> Tablero:
     PRE: El tablero *t* tiene que estar bien formado
 
     Args: 
-        t(Tablero): El tablero del cual se quieren activar las trampas. 
+        t(Tablero): El tablero en el cual se quieren activar las trampas. 
 
     Returns: 
         El tablero después de haber activado todas las trampas. 
@@ -516,7 +511,17 @@ def reune_condiciones_de_ganar(j: Juego, col: Color) -> bool:
     )
 
 def hay_ganador_determinado(j: Juego) -> bool:
-    """Indica si existe un ganador determinado al inicio de un turno."""
+    """
+    Indica si existe un ganador determinado al inicio de un turno.
+
+    PRE: El juego *j* está bien formado. 
+
+    Args: 
+        j(Juego): El juego a consultar. 
+
+    Returns:
+        True si hay un ganador determinado, False si no. 
+    """
     return (
         j.pasos_consumidos == 0
         and (
@@ -528,7 +533,14 @@ def hay_ganador_determinado(j: Juego) -> bool:
 def ganador_del_juego(j : Juego) -> Color:
     """
     Devuelve el color ganador del juego.
-    Precondición: hay_ganador_determinado(j).  
+
+    PRE: El juego *j* está bien formado y hay un ganador determinado. 
+
+    Args: 
+        j(Juego): El juego a consultar.
+
+    Returns:
+        Color del ganador del juego. 
     """  
     jugador_anterior: Color = oponente(j.turno)
     ganador: Color = j.turno
