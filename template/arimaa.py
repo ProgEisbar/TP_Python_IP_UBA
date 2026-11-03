@@ -548,39 +548,61 @@ def ganador_del_juego(j : Juego) -> Color:
         ganador = jugador_anterior
     return ganador
 
+#### Ejercicio 8 - Todos los movimientos posibles
+
+def agregar_movimientos_dobles(
+    j: Juego, origen: Posicion, primera: Direccion, res: list[Movimiento]
+) -> None:
+    """Agrega los arrastres y empujes legales con una primera direccion dada."""
+    segunda: Direccion
+    m: Movimiento
+
+    for segunda in [NORTE, SUR, ESTE, OESTE]:
+        m = Movimiento(ARRASTRAR, origen, [primera, segunda])
+        if puede_realizar_movimiento(j, m):
+            res.append(m)
+
+        m = Movimiento(EMPUJAR, origen, [primera, segunda])
+        if puede_realizar_movimiento(j, m):
+            res.append(m)
+
+
+def agregar_movimientos_de_pieza(
+    j: Juego, origen: Posicion, res: list[Movimiento]
+) -> None:
+    """Agrega los movimientos legales de la pieza propia en origen."""
+    direccion: Direccion
+    m: Movimiento
+
+    if hay_pieza_de_color(j.tablero, origen, j.turno):
+        for direccion in [NORTE, SUR, ESTE, OESTE]:
+            m = Movimiento(MOVER_A_SECAS, origen, [direccion])
+            if puede_realizar_movimiento(j, m):
+                res.append(m)
+
+            agregar_movimientos_dobles(j, origen, direccion, res)
+
+
+def agregar_movimientos_de_fila(
+    j: Juego, fila: int, res: list[Movimiento]
+) -> None:
+    """Revisa todas las posiciones de una fila."""
+    columna: int
+
+    for columna in range(ANCHO):
+        agregar_movimientos_de_pieza(j, Posicion(fila, columna), res)
+
+
 def todos_los_movimientos_posibles(j: Juego) -> list[Movimiento]:
     """
-    Devuelve todos los movimientos legales para el jugador actual sin repetidos.
+    Devuelve todos los movimientos legales del jugador actual, sin repetidos.
 
     PRE: juego_bien_formado(j)
     """
     res: list[Movimiento] = []
-    direcciones: list[Direccion] = [NORTE, SUR, ESTE, OESTE]
-
     fila: int
-    columna: int
-    origen: Posicion
-    d1: Direccion
-    d2: Direccion
-    m: Movimiento
 
     for fila in range(ALTO):
-        for columna in range(ANCHO):
-            origen = Posicion(fila, columna)
-
-            if hay_pieza_de_color(j.tablero, origen, j.turno):
-                for d1 in direcciones:
-                    m = Movimiento(MOVER_A_SECAS, origen, [d1])
-                    if puede_realizar_movimiento(j, m):
-                        res.append(m)
-
-                    for d2 in direcciones:
-                        m = Movimiento(ARRASTRAR, origen, [d1, d2])
-                        if puede_realizar_movimiento(j, m):
-                            res.append(m)
-
-                        m = Movimiento(EMPUJAR, origen, [d1, d2])
-                        if puede_realizar_movimiento(j, m):
-                            res.append(m)
+        agregar_movimientos_de_fila(j, fila, res)
 
     return res

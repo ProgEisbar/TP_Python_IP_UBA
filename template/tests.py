@@ -620,3 +620,102 @@ class test_ganador_del_juego(unittest.TestCase):
         j:Juego = Juego(t,DORADO,0)
         self.assertTrue(hay_ganador_determinado(j))
         self.assertEqual(ganador_del_juego(j),DORADO)
+#### Ejercicio 8 - Todos los movimientos posibles
+
+class test_todos_los_movimientos_posibles(unittest.TestCase):
+
+    def test_tablero_vacio(self):
+        j = Juego(tablero_8x8_vacio(), DORADO, 0)
+        self.assertEqual(todos_los_movimientos_posibles(j), [])
+
+    def test_movimientos_a_secas_de_pieza_aislada(self):
+        t = tablero_8x8_vacio()
+        origen = Posicion(3, 3)
+        t[3][3] = Pieza(GATO, DORADO)
+        j = Juego(t, DORADO, 0)
+        esperado = [
+            Movimiento(MOVER_A_SECAS, origen, [NORTE]),
+            Movimiento(MOVER_A_SECAS, origen, [SUR]),
+            Movimiento(MOVER_A_SECAS, origen, [ESTE]),
+            Movimiento(MOVER_A_SECAS, origen, [OESTE]),
+        ]
+        self.assertEqual(todos_los_movimientos_posibles(j), esperado)
+
+    def test_arrastrar_empujar_y_sin_repetidos(self):
+        t = tablero_8x8_vacio()
+        origen = Posicion(3, 3)
+        t[3][3] = Pieza(ELEFANTE, DORADO)
+        t[3][2] = Pieza(CONEJO, PLATEADO)
+        t[4][3] = Pieza(GATO, PLATEADO)
+        j = Juego(t, DORADO, 0)
+        movimientos = todos_los_movimientos_posibles(j)
+
+        self.assertIn(Movimiento(ARRASTRAR, origen, [ESTE, ESTE]), movimientos)
+        self.assertIn(Movimiento(EMPUJAR, origen, [NORTE, ESTE]), movimientos)
+        self.assertNotIn(Movimiento(MOVER_A_SECAS, origen, [NORTE]), movimientos)
+        self.assertNotIn(Movimiento(EMPUJAR, origen, [NORTE, SUR]), movimientos)
+
+        for m in movimientos:
+            self.assertTrue(movimiento_bien_formado(m))
+            self.assertTrue(puede_realizar_movimiento(j, m))
+            self.assertEqual(movimientos.count(m), 1)
+
+    def test_conejo_no_retrocede_y_respeta_bordes(self):
+        t = tablero_8x8_vacio()
+        origen = Posicion(0, 0)
+        t[0][0] = Pieza(CONEJO, DORADO)
+        j = Juego(t, DORADO, 0)
+        esperado = [
+            Movimiento(MOVER_A_SECAS, origen, [NORTE]),
+            Movimiento(MOVER_A_SECAS, origen, [ESTE]),
+        ]
+        self.assertEqual(todos_los_movimientos_posibles(j), esperado)
+
+    def test_no_mueve_piezas_del_oponente(self):
+        t = tablero_8x8_vacio()
+        t[3][3] = Pieza(ELEFANTE, PLATEADO)
+        j = Juego(t, DORADO, 0)
+        self.assertEqual(todos_los_movimientos_posibles(j), [])
+
+    def test_pieza_congelada_no_puede_moverse(self):
+        t = tablero_8x8_vacio()
+        t[3][3] = Pieza(GATO, DORADO)
+        t[3][4] = Pieza(ELEFANTE, PLATEADO)
+        j = Juego(t, DORADO, 0)
+        self.assertEqual(todos_los_movimientos_posibles(j), [])
+
+    def test_con_un_paso_restante_no_hay_empujes_ni_arrastres(self):
+        t = tablero_8x8_vacio()
+        origen = Posicion(3, 3)
+        t[3][3] = Pieza(ELEFANTE, DORADO)
+        t[4][3] = Pieza(CONEJO, PLATEADO)
+        j = Juego(t, DORADO, 3)
+        esperado = [
+            Movimiento(MOVER_A_SECAS, origen, [SUR]),
+            Movimiento(MOVER_A_SECAS, origen, [ESTE]),
+            Movimiento(MOVER_A_SECAS, origen, [OESTE]),
+        ]
+        self.assertEqual(todos_los_movimientos_posibles(j), esperado)
+
+    def test_considera_piezas_de_distintas_filas(self):
+        t = tablero_8x8_vacio()
+        t[0][0] = Pieza(CONEJO, DORADO)
+        t[7][7] = Pieza(CONEJO, DORADO)
+        j = Juego(t, DORADO, 0)
+        movimientos = todos_los_movimientos_posibles(j)
+        self.assertEqual(len(movimientos), 3)
+        self.assertIn(
+            Movimiento(MOVER_A_SECAS, Posicion(7, 7), [OESTE]),
+            movimientos
+        )
+
+    def test_conejo_plateado_no_retrocede(self):
+        t = tablero_8x8_vacio()
+        origen = Posicion(7, 7)
+        t[7][7] = Pieza(CONEJO, PLATEADO)
+        j = Juego(t, PLATEADO, 0)
+        esperado = [
+            Movimiento(MOVER_A_SECAS, origen, [SUR]),
+            Movimiento(MOVER_A_SECAS, origen, [OESTE]),
+        ]
+        self.assertEqual(todos_los_movimientos_posibles(j), esperado)
