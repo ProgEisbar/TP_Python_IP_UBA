@@ -548,6 +548,39 @@ def ganador_del_juego(j : Juego) -> Color:
         ganador = jugador_anterior
     return ganador
 
+def todos_los_movimientos_posibles(j: Juego) -> list[Movimiento]:
+    """
+    Devuelve todos los movimientos legales para el jugador actual sin repetidos.
 
+    PRE: juego_bien_formado(j)
+    """
+    res: list[Movimiento] = []
+    direcciones: list[Direccion] = [NORTE, SUR, ESTE, OESTE]
 
+    fila: int
+    columna: int
+    origen: Posicion
+    d1: Direccion
+    d2: Direccion
+    m: Movimiento
 
+    for fila in range(ALTO):
+        for columna in range(ANCHO):
+            origen = Posicion(fila, columna)
+
+            if hay_pieza_de_color(j.tablero, origen, j.turno):
+                for d1 in direcciones:
+                    m = Movimiento(MOVER_A_SECAS, origen, [d1])
+                    if puede_realizar_movimiento(j, m):
+                        res.append(m)
+
+                    for d2 in direcciones:
+                        m = Movimiento(ARRASTRAR, origen, [d1, d2])
+                        if puede_realizar_movimiento(j, m):
+                            res.append(m)
+
+                        m = Movimiento(EMPUJAR, origen, [d1, d2])
+                        if puede_realizar_movimiento(j, m):
+                            res.append(m)
+
+    return res
